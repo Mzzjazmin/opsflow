@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">My Tasks</h2>
+    <p class="section-subtitle mb-0">Tasks currently assigned to you.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <p class="text-muted mb-4">My tasks count: <strong>{{ tasks|length }}</strong></p>
+
+        {% if tasks %}
+            <div class="list-group">
+                {% for task in tasks %}
+                    <div class="list-group-item">
+                        <a href="/tasks/{{ task.id }}" class="fw-semibold text-decoration-none">{{ task.title }}</a>
+                        <div class="mt-1">
+                            <small class="text-muted">Status:</small> {{ task.status }}
+                            <span class="mx-2">|</span>
+                            <small class="text-muted">Priority:</small> {{ task.priority }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mb-0">No tasks assigned to you.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

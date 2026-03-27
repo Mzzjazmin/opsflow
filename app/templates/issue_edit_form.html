@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">Edit Issue</h2>
+    <p class="section-subtitle mb-0">Update issue details and investigation assignment.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Issue Title</label>
+                <input type="text" name="title" class="form-control" value="{{ issue.title }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Issue Description</label>
+                <textarea name="description" class="form-control" rows="4">{{ issue.description }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Assign Supervisor / Manager</label>
+                <select name="assigned_to_id" class="form-select">
+                    <option value="">-- Select Supervisor --</option>
+                    {% for supervisor in supervisors %}
+                        <option value="{{ supervisor.id }}" {% if issue.assigned_to_id == supervisor.id %}selected{% endif %}>
+                            {{ supervisor.full_name }} ({{ supervisor.role }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/issues/{{ issue.id }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

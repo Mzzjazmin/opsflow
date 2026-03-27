@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title">Dashboard</h2>
+    <p class="section-subtitle">Track operational workload, approvals, and issues in one place.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Total Tasks</h6>
+                <div class="metric-number">{{ total_tasks }}</div>
+                <a href="/tasks" class="btn btn-primary btn-sm mt-3">View Tasks</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <h6 class="text-muted">My Tasks</h6>
+                <div class="metric-number">{{ my_tasks_count }}</div>
+                <a href="/my-tasks" class="btn btn-primary btn-sm mt-3">View My Tasks</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Completed Tasks</h6>
+                <div class="metric-number">{{ completed_tasks }}</div>
+                <a href="/tasks" class="btn btn-success btn-sm mt-3">View Tasks</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Open Issues</h6>
+                <div class="metric-number">{{ open_issues }}</div>
+                <a href="/issues" class="btn btn-warning btn-sm mt-3">View Issues</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card metric-card h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Pending Approvals</h6>
+                <div class="metric-number">{{ pending_approvals }}</div>
+
+                {% if current_user.role in ["admin", "supervisor"] %}
+                    <a href="/approvals" class="btn btn-warning btn-sm mt-3">View Approvals</a>
+                {% else %}
+                    <p class="text-muted mt-3 mb-0">Manager access only</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card soft-card h-100">
+            <div class="card-body">
+                <h5 class="mb-3">Quick Summary</h5>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <small class="text-muted">Total Tasks</small>
+                        <div class="fw-bold">{{ total_tasks }}</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <small class="text-muted">My Tasks</small>
+                        <div class="fw-bold">{{ my_tasks_count }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Completed</small>
+                        <div class="fw-bold">{{ completed_tasks }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Open Issues</small>
+                        <div class="fw-bold">{{ open_issues }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

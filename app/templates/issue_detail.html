@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">{{ issue.title }}</h2>
+    <p class="section-subtitle mb-0">Issue detail and investigation workflow.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <div class="row g-3 mb-4">
+            <div class="col-12">
+                <strong>Description:</strong>
+                <p class="mb-0 mt-1">{{ issue.description or "No description provided." }}</p>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <strong>Status:</strong>
+                <div>{{ issue.status }}</div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <strong>Assigned To:</strong>
+                <div>
+                    {% if issue.assigned_to %}
+                        {{ issue.assigned_to.full_name }}
+                    {% else %}
+                        Unassigned
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <strong>Raised By:</strong>
+                <div>
+                    {% if issue.raised_by %}
+                        {{ issue.raised_by.full_name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if issue.investigation_note %}
+            <div class="mb-3">
+                <strong>Investigation Note:</strong>
+                <p class="mb-0 mt-1">{{ issue.investigation_note }}</p>
+            </div>
+        {% endif %}
+
+        {% if issue.resolution_note %}
+            <div class="mb-3">
+                <strong>Resolution Note:</strong>
+                <p class="mb-0 mt-1">{{ issue.resolution_note }}</p>
+            </div>
+        {% endif %}
+
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="/issues/{{ issue.id }}/edit" class="btn btn-outline-dark btn-sm">Edit Issue</a>
+
+            {% if current_user.role in ["admin", "supervisor"] %}
+                <a href="/issues/{{ issue.id }}/investigate" class="btn btn-primary btn-sm">Start Investigation</a>
+                <a href="/issues/{{ issue.id }}/resolve" class="btn btn-success btn-sm">Resolve Issue</a>
+                <a href="/issues/{{ issue.id }}/escalate" class="btn btn-danger btn-sm">Escalate Issue</a>
+            {% endif %}
+
+            <a href="/issues" class="btn btn-secondary btn-sm">Back to Issues</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

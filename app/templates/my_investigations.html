@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">My Investigations</h2>
+    <p class="section-subtitle mb-0">Issues currently assigned to you for investigation.</p>
+</div>
+
+<div class="card soft-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-12 col-md-5">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search issue title">
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    <option value="Assigned for Investigation" {% if status == "Assigned for Investigation" %}selected{% endif %}>Assigned for Investigation</option>
+                    <option value="Under Investigation" {% if status == "Under Investigation" %}selected{% endif %}>Under Investigation</option>
+                    <option value="Resolved" {% if status == "Resolved" %}selected{% endif %}>Resolved</option>
+                    <option value="Escalated" {% if status == "Escalated" %}selected{% endif %}>Escalated</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <a href="/my-investigations" class="btn btn-secondary w-100">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <p class="text-muted mb-4">Assigned issues: <strong>{{ issues|length }}</strong></p>
+
+        {% if issues %}
+            <div class="list-group">
+                {% for issue in issues %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-2">
+                            <div>
+                                <a href="/issues/{{ issue.id }}" class="fw-semibold text-decoration-none">{{ issue.title }}</a>
+                                <div class="mt-1">
+                                    <small class="text-muted">Status:</small> {{ issue.status }}
+                                </div>
+                                <div>
+                                    <small class="text-muted">Raised by:</small>
+                                    {% if issue.raised_by %}
+                                        {{ issue.raised_by.full_name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <a href="/issues/{{ issue.id }}" class="btn btn-outline-primary btn-sm">Open</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mb-0">No issues assigned to you for investigation.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

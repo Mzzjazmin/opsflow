@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h2 class="page-title mb-1">Tasks</h2>
+        <p class="section-subtitle mb-0">Create, assign, and monitor operational tasks.</p>
+    </div>
+    <a href="/tasks/new" class="btn btn-success">Create New Task</a>
+</div>
+
+<div class="card soft-card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-12 col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search task title">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    <option value="New" {% if status == "New" %}selected{% endif %}>New</option>
+                    <option value="In Progress" {% if status == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select">
+                    <option value="">All</option>
+                    <option value="Low" {% if priority == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if priority == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if priority == "High" %}selected{% endif %}>High</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <label class="form-label">Assigned To</label>
+                <select name="assigned_to" class="form-select">
+                    <option value="">All</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if assigned_to == user.id|string %}selected{% endif %}>
+                            {{ user.full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <a href="/tasks" class="btn btn-secondary w-100">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <p class="text-muted mb-4">Tasks count: <strong>{{ tasks|length }}</strong></p>
+
+        {% if tasks %}
+            <div class="list-group">
+                {% for task in tasks %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-2">
+                            <div>
+                                <a href="/tasks/{{ task.id }}" class="fw-semibold text-decoration-none">{{ task.title }}</a>
+                                <div class="mt-1">
+                                    <small class="text-muted">Status:</small> {{ task.status }}
+                                    <span class="mx-2">|</span>
+                                    <small class="text-muted">Priority:</small> {{ task.priority }}
+                                </div>
+                                <div>
+                                    <small class="text-muted">Assigned to:</small>
+                                    {% if task.assigned_to %}
+                                        {{ task.assigned_to.full_name }}
+                                    {% else %}
+                                        Unassigned
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <small class="text-muted">Approval:</small> {{ task.approval_status }}
+                                </div>
+                            </div>
+                            <div>
+                                <a href="/tasks/{{ task.id }}" class="btn btn-outline-primary btn-sm">Open</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mb-0">No tasks found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
