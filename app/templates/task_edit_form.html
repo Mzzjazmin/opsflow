@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">Edit Task</h2>
+    <p class="section-subtitle mb-0">Update task details and assignment.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <form method="POST" class="row g-3">
+
+            <div class="col-12">
+                <label class="form-label">Task Title</label>
+                <input type="text" name="title" class="form-control" value="{{ task.title }}" required>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Task Description</label>
+                <textarea name="description" class="form-control" rows="4">{{ task.description }}</textarea>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select">
+                    <option value="Low" {% if task.priority == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if task.priority == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if task.priority == "High" %}selected{% endif %}>High</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">Assign To</label>
+                <select name="assigned_to_id" class="form-select">
+                    <option value="">-- Select User --</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if task.assigned_to_id == user.id %}selected{% endif %}>
+                            {{ user.full_name }} ({{ user.role|title }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 d-flex flex-column flex-md-row gap-2 mt-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/tasks/{{ task.id }}" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}
