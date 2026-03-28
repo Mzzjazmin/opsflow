@@ -55,14 +55,22 @@
             border-radius: 10px;
         }
 
-        .form-control,
-        .form-select,
-        textarea {
+        .form-control, .form-select, textarea {
             border-radius: 10px !important;
         }
 
         .top-space {
             margin-top: 24px;
+        }
+
+        .user-badge {
+            background: white;
+            color: #111827;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
         @media (max-width: 768px) {
@@ -77,15 +85,20 @@
             .navbar .btn {
                 width: 100%;
             }
+
+            .user-badge {
+                display: block;
+                margin: 10px 0;
+                text-align: center;
+            }
         }
     </style>
 </head>
-
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
     <div class="container">
+
         <a class="navbar-brand" href="/dashboard">OpsFlow</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#opsflowNav">
@@ -93,8 +106,9 @@
         </button>
 
         <div class="collapse navbar-collapse" id="opsflowNav">
-            <div class="ms-auto mobile-stack">
+            <div class="ms-auto mobile-stack d-flex align-items-center">
 
+                <!-- NAV LINKS -->
                 <a class="btn btn-outline-light btn-sm me-2" href="/dashboard">Dashboard</a>
                 <a class="btn btn-outline-light btn-sm me-2" href="/tasks">Tasks</a>
                 <a class="btn btn-outline-light btn-sm me-2" href="/my-tasks">My Tasks</a>
@@ -102,9 +116,17 @@
                 {% if current_user.role in ["admin", "supervisor"] %}
                     <a class="btn btn-outline-light btn-sm me-2" href="/approvals">Approvals</a>
                     <a class="btn btn-outline-light btn-sm me-2" href="/my-investigations">My Investigations</a>
+                    <a class="btn btn-outline-light btn-sm me-2" href="/activity">Activity</a>
                 {% endif %}
 
                 <a class="btn btn-outline-light btn-sm me-2" href="/issues">Issues</a>
+
+                <!-- USER INFO (TOP RIGHT) -->
+                <span class="user-badge me-3">
+                    👤 {{ current_user.full_name }} | {{ current_user.role|title }}
+                </span>
+
+                <!-- LOGOUT -->
                 <a class="btn btn-danger btn-sm" href="/logout">Logout</a>
 
             </div>
@@ -112,12 +134,10 @@
     </div>
 </nav>
 
-<!-- MAIN CONTENT -->
 <div class="container top-space mb-5">
     {% block content %}{% endblock %}
 </div>
 
-<!-- BOOTSTRAP JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
