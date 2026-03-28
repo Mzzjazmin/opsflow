@@ -57,7 +57,9 @@
         {% endif %}
 
         <div class="d-flex flex-column flex-md-row gap-2">
-            <a href="/issues/{{ issue.id }}/edit" class="btn btn-outline-dark btn-sm">Edit Issue</a>
+            {% if current_user.role == "admin" %}
+                <a href="/issues/{{ issue.id }}/edit" class="btn btn-outline-dark btn-sm">Edit Issue</a>
+            {% endif %}
 
             {% if current_user.role in ["admin", "supervisor"] %}
                 <a href="/issues/{{ issue.id }}/investigate" class="btn btn-primary btn-sm">Start Investigation</a>
@@ -65,6 +67,7 @@
                 <a href="/issues/{{ issue.id }}/escalate" class="btn btn-danger btn-sm">Escalate Issue</a>
             {% endif %}
 
+            <a href="/issues/{{ issue.id }}/activity" class="btn btn-outline-secondary btn-sm">View Activity</a>
             <a href="/issues" class="btn btn-secondary btn-sm">Back to Issues</a>
         </div>
     </div>

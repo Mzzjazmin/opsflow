@@ -42,10 +42,17 @@
         </div>
 
         <div class="d-flex flex-column flex-md-row gap-2">
-            <a href="/tasks/{{ task.id }}/edit" class="btn btn-outline-dark btn-sm">Edit Task</a>
-            <a href="/tasks/{{ task.id }}/start" class="btn btn-primary btn-sm">Start Task</a>
-            <a href="/tasks/{{ task.id }}/complete" class="btn btn-success btn-sm">Mark Completed</a>
-            <a href="/tasks/{{ task.id }}/submit" class="btn btn-warning btn-sm">Submit for Approval</a>
+            {% if current_user.role == "admin" %}
+                <a href="/tasks/{{ task.id }}/edit" class="btn btn-outline-dark btn-sm">Edit Task</a>
+            {% endif %}
+
+            {% if current_user.role in ["admin", "inputter"] %}
+                <a href="/tasks/{{ task.id }}/start" class="btn btn-primary btn-sm">Start Task</a>
+                <a href="/tasks/{{ task.id }}/complete" class="btn btn-success btn-sm">Mark Completed</a>
+                <a href="/tasks/{{ task.id }}/submit" class="btn btn-warning btn-sm">Submit for Approval</a>
+            {% endif %}
+
+            <a href="/tasks/{{ task.id }}/activity" class="btn btn-outline-secondary btn-sm">View Activity</a>
             <a href="/tasks" class="btn btn-secondary btn-sm">Back to Tasks</a>
         </div>
     </div>
