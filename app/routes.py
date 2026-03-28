@@ -6,8 +6,18 @@ from app.models import Task, Issue, User, ActivityLog
 main = Blueprint("main", __name__)
 
 
-def manager_required():
+def admin_required():
+    if current_user.role != "admin":
+        abort(403)
+
+
+def supervisor_required():
     if current_user.role not in ["admin", "supervisor"]:
+        abort(403)
+
+
+def inputter_required():
+    if current_user.role not in ["admin", "inputter"]:
         abort(403)
 
 
@@ -26,9 +36,6 @@ def log_activity(action, entity_type, entity_id):
 @main.route("/dashboard")
 @login_required
 def dashboard():
-    tasks = Task.query.all()
-    issues = Issue.query.all()
-
     total_tasks = Task.query.count()
     my_tasks_count = Task.query.filter_by(assigned_to_id=current_user.id).count()
     completed_tasks = Task.query.filter_by(status="Completed").count()
@@ -37,8 +44,6 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        tasks=tasks,
-        issues=issues,
         total_tasks=total_tasks,
         my_tasks_count=my_tasks_count,
         completed_tasks=completed_tasks,
@@ -60,13 +65,10 @@ def tasks():
 
     if search:
         query = query.filter(Task.title.ilike(f"%{search}%"))
-
     if status:
         query = query.filter(Task.status == status)
-
     if priority:
         query = query.filter(Task.priority == priority)
-
     if assigned_to:
         query = query.filter(Task.assigned_to_id == int(assigned_to))
 
@@ -87,6 +89,7 @@ def tasks():
 @main.route("/tasks/new", methods=["GET", "POST"])
 @login_required
 def new_task():
+    admin_required()
     users = User.query.all()
 
     if request.method == "POST":
@@ -100,7 +103,6 @@ def new_task():
         )
         db.session.add(task)
         db.session.commit()
-
         log_activity("Created task", "Task", task.id)
 
         return redirect(url_for("main.tasks"))
@@ -118,6 +120,7 @@ def task_detail(task_id):
 @main.route("/tasks/<int:task_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_task(task_id):
+    admin_required()
     task = Task.query.get_or_404(task_id)
     users = User.query.all()
 
@@ -140,20 +143,39 @@ def edit_task(task_id):
 @main.route("/tasks/<int:task_id>/start")
 @login_required
 def start_task(task_id):
+    inputter_required()
     task = Task.query.get_or_404(task_id)
+
     task.status = "In Progress"
     db.session.commit()
     log_activity("Started task", "Task", task.id)
+
     return redirect(url_for("main.task_detail", task_id=task.id))
 
 
 @main.route("/tasks/<int:task_id>/complete")
 @login_required
 def complete_task(task_id):
+    inputter_required()
     task = Task.query.get_or_404(task_id)
+
     task.status = "Completed"
     db.session.commit()
     log_activity("Completed task", "Task", task.id)
+
+    return redirect(url_for("main.task_detail", task_id=task.id))
+
+
+@main.route("/tasks/<int:task_id>/submit")
+@login_required
+def submit_task(task_id):
+    inputter_required()
+    task = Task.query.get_or_404(task_id)
+
+    task.approval_status = "Pending"
+    db.session.commit()
+    log_activity("Submitted task for approval", "Task", task.id)
+
     return redirect(url_for("main.task_detail", task_id=task.id))
 
 
@@ -168,7 +190,6 @@ def my_tasks():
 
     if status:
         query = query.filter(Task.status == status)
-
     if priority:
         query = query.filter(Task.priority == priority)
 
@@ -183,20 +204,10 @@ def my_tasks():
 
 
 # ---------------- APPROVALS ----------------
-@main.route("/tasks/<int:task_id>/submit")
-@login_required
-def submit_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    task.approval_status = "Pending"
-    db.session.commit()
-    log_activity("Submitted task for approval", "Task", task.id)
-    return redirect(url_for("main.task_detail", task_id=task.id))
-
-
 @main.route("/approvals")
 @login_required
 def approvals():
-    manager_required()
+    supervisor_required()
     tasks = Task.query.filter_by(approval_status="Pending").all()
     return render_template("approvals.html", tasks=tasks)
 
@@ -204,24 +215,28 @@ def approvals():
 @main.route("/tasks/<int:task_id>/approve")
 @login_required
 def approve_task(task_id):
-    manager_required()
+    supervisor_required()
     task = Task.query.get_or_404(task_id)
+
     task.approval_status = "Approved"
     task.status = "Completed"
     db.session.commit()
     log_activity("Approved task", "Task", task.id)
+
     return redirect(url_for("main.approvals"))
 
 
 @main.route("/tasks/<int:task_id>/reject")
 @login_required
 def reject_task(task_id):
-    manager_required()
+    supervisor_required()
     task = Task.query.get_or_404(task_id)
+
     task.approval_status = "Rejected"
     task.status = "In Progress"
     db.session.commit()
     log_activity("Rejected task", "Task", task.id)
+
     return redirect(url_for("main.approvals"))
 
 
@@ -237,15 +252,13 @@ def issues():
 
     if search:
         query = query.filter(Issue.title.ilike(f"%{search}%"))
-
     if status:
         query = query.filter(Issue.status == status)
-
     if assigned_to:
         query = query.filter(Issue.assigned_to_id == int(assigned_to))
 
     issues = query.all()
-    supervisors = User.query.filter(User.role.in_(["admin", "supervisor"])).all()
+    supervisors = User.query.filter_by(role="supervisor").all()
 
     return render_template(
         "issues.html",
@@ -260,7 +273,8 @@ def issues():
 @main.route("/issues/new", methods=["GET", "POST"])
 @login_required
 def new_issue():
-    supervisors = User.query.filter(User.role.in_(["admin", "supervisor"])).all()
+    admin_required()
+    supervisors = User.query.filter_by(role="supervisor").all()
 
     if request.method == "POST":
         assigned_to_id = request.form.get("assigned_to_id")
@@ -274,7 +288,6 @@ def new_issue():
         )
         db.session.add(issue)
         db.session.commit()
-
         log_activity("Created issue", "Issue", issue.id)
 
         return redirect(url_for("main.issues"))
@@ -292,8 +305,9 @@ def issue_detail(issue_id):
 @main.route("/issues/<int:issue_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_issue(issue_id):
+    admin_required()
     issue = Issue.query.get_or_404(issue_id)
-    supervisors = User.query.filter(User.role.in_(["admin", "supervisor"])).all()
+    supervisors = User.query.filter_by(role="supervisor").all()
 
     if request.method == "POST":
         assigned_to_id = request.form.get("assigned_to_id")
@@ -316,7 +330,7 @@ def edit_issue(issue_id):
 @main.route("/my-investigations")
 @login_required
 def my_investigations():
-    manager_required()
+    supervisor_required()
 
     search = request.args.get("search", "")
     status = request.args.get("status", "")
@@ -325,7 +339,6 @@ def my_investigations():
 
     if search:
         query = query.filter(Issue.title.ilike(f"%{search}%"))
-
     if status:
         query = query.filter(Issue.status == status)
 
@@ -342,18 +355,20 @@ def my_investigations():
 @main.route("/issues/<int:issue_id>/investigate")
 @login_required
 def investigate_issue(issue_id):
-    manager_required()
+    supervisor_required()
     issue = Issue.query.get_or_404(issue_id)
+
     issue.status = "Under Investigation"
     db.session.commit()
     log_activity("Started investigation", "Issue", issue.id)
+
     return redirect(url_for("main.issue_detail", issue_id=issue.id))
 
 
 @main.route("/issues/<int:issue_id>/resolve", methods=["GET", "POST"])
 @login_required
 def resolve_issue(issue_id):
-    manager_required()
+    supervisor_required()
     issue = Issue.query.get_or_404(issue_id)
 
     if request.method == "POST":
@@ -361,6 +376,7 @@ def resolve_issue(issue_id):
         issue.resolution_note = request.form.get("resolution_note")
         db.session.commit()
         log_activity("Resolved issue", "Issue", issue.id)
+
         return redirect(url_for("main.issue_detail", issue_id=issue.id))
 
     return render_template("issue_resolve_form.html", issue=issue)
@@ -369,14 +385,21 @@ def resolve_issue(issue_id):
 @main.route("/issues/<int:issue_id>/escalate", methods=["GET", "POST"])
 @login_required
 def escalate_issue(issue_id):
-    manager_required()
+    supervisor_required()
     issue = Issue.query.get_or_404(issue_id)
 
     if request.method == "POST":
+        admin_user = User.query.filter_by(role="admin").first()
+
         issue.status = "Escalated"
         issue.investigation_note = request.form.get("investigation_note")
+
+        if admin_user:
+            issue.assigned_to_id = admin_user.id
+
         db.session.commit()
-        log_activity("Escalated issue", "Issue", issue.id)
+        log_activity("Escalated issue to admin", "Issue", issue.id)
+
         return redirect(url_for("main.issue_detail", issue_id=issue.id))
 
     return render_template("issue_escalate_form.html", issue=issue)
@@ -386,6 +409,7 @@ def escalate_issue(issue_id):
 @main.route("/activity")
 @login_required
 def activity():
+    supervisor_required()
     logs = ActivityLog.query.order_by(ActivityLog.timestamp.desc()).all()
     return render_template("activity.html", logs=logs)
 
@@ -398,6 +422,7 @@ def task_activity(task_id):
         entity_type="Task",
         entity_id=task.id
     ).order_by(ActivityLog.timestamp.desc()).all()
+
     return render_template("entity_activity.html", logs=logs, title=f"Task Activity - {task.title}")
 
 
@@ -409,6 +434,7 @@ def issue_activity(issue_id):
         entity_type="Issue",
         entity_id=issue.id
     ).order_by(ActivityLog.timestamp.desc()).all()
+
     return render_template("entity_activity.html", logs=logs, title=f"Issue Activity - {issue.title}")
 
 
