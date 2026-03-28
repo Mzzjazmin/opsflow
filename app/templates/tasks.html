@@ -4,9 +4,12 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
         <h2 class="page-title mb-1">Tasks</h2>
-        <p class="section-subtitle mb-0">Create, assign, and monitor operational tasks.</p>
+        <p class="section-subtitle mb-0">Track assigned work, progress, and approvals.</p>
     </div>
-    <a href="/tasks/new" class="btn btn-success">Create New Task</a>
+
+    {% if current_user.role == "admin" %}
+        <a href="/tasks/new" class="btn btn-success">Create New Task</a>
+    {% endif %}
 </div>
 
 <div class="card soft-card mb-4">
@@ -59,21 +62,22 @@
 
 <div class="card soft-card">
     <div class="card-body">
-        <p class="text-muted mb-4">Tasks count: <strong>{{ tasks|length }}</strong></p>
+        <p class="text-muted mb-4">Tasks found: <strong>{{ tasks|length }}</strong></p>
 
         {% if tasks %}
             <div class="list-group">
                 {% for task in tasks %}
                     <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-2">
+                        <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
                             <div>
                                 <a href="/tasks/{{ task.id }}" class="fw-semibold text-decoration-none">{{ task.title }}</a>
-                                <div class="mt-1">
-                                    <small class="text-muted">Status:</small> {{ task.status }}
-                                    <span class="mx-2">|</span>
-                                    <small class="text-muted">Priority:</small> {{ task.priority }}
+
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    <span class="status-badge">{{ task.status }}</span>
+                                    <span class="priority-badge">{{ task.priority }}</span>
                                 </div>
-                                <div>
+
+                                <div class="mt-2">
                                     <small class="text-muted">Assigned to:</small>
                                     {% if task.assigned_to %}
                                         {{ task.assigned_to.full_name }}
@@ -81,11 +85,13 @@
                                         Unassigned
                                     {% endif %}
                                 </div>
+
                                 <div>
                                     <small class="text-muted">Approval:</small> {{ task.approval_status }}
                                 </div>
                             </div>
-                            <div>
+
+                            <div class="d-flex gap-2">
                                 <a href="/tasks/{{ task.id }}" class="btn btn-outline-primary btn-sm">Open</a>
                             </div>
                         </div>
@@ -93,7 +99,10 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="mb-0">No tasks found.</p>
+            <div class="text-center py-4">
+                <h5 class="mb-2">No tasks found</h5>
+                <p class="text-muted mb-0">Try changing your filters or create a new task.</p>
+            </div>
         {% endif %}
     </div>
 </div>

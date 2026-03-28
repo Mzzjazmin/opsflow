@@ -10,6 +10,11 @@
     <style>
         body {
             background-color: #f5f7fb;
+            color: #111827;
+        }
+
+        .navbar {
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
         }
 
         .navbar-brand {
@@ -29,14 +34,20 @@
 
         .soft-card {
             border: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
         }
 
         .metric-card {
             border: none;
             border-radius: 18px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
         }
 
         .metric-number {
@@ -46,9 +57,10 @@
         }
 
         .list-group-item {
-            border-radius: 12px !important;
+            border-radius: 14px !important;
             margin-bottom: 10px;
             border: 1px solid #eef2f7;
+            padding: 16px;
         }
 
         .btn {
@@ -60,17 +72,45 @@
         }
 
         .top-space {
-            margin-top: 24px;
+            margin-top: 28px;
         }
 
         .user-badge {
             background: white;
             color: #111827;
-            padding: 6px 12px;
+            padding: 7px 14px;
             border-radius: 999px;
             font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .nav-link-btn {
+            min-width: 92px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .app-shell {
+            max-width: 1280px;
         }
 
         @media (max-width: 768px) {
@@ -91,14 +131,17 @@
                 margin: 10px 0;
                 text-align: center;
             }
+
+            .nav-link-btn {
+                min-width: unset;
+            }
         }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
-    <div class="container">
-
+    <div class="container app-shell">
         <a class="navbar-brand" href="/dashboard">OpsFlow</a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#opsflowNav">
@@ -108,37 +151,39 @@
         <div class="collapse navbar-collapse" id="opsflowNav">
             <div class="ms-auto mobile-stack d-flex align-items-center">
 
-                <!-- NAV LINKS -->
-                <a class="btn btn-outline-light btn-sm me-2" href="/dashboard">Dashboard</a>
-                <a class="btn btn-outline-light btn-sm me-2" href="/tasks">Tasks</a>
-                <a class="btn btn-outline-light btn-sm me-2" href="/my-tasks">My Tasks</a>
+                <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/dashboard">Dashboard</a>
 
-                {% if current_user.role in ["admin", "supervisor"] %}
-                    <a class="btn btn-outline-light btn-sm me-2" href="/approvals">Approvals</a>
-                    <a class="btn btn-outline-light btn-sm me-2" href="/my-investigations">My Investigations</a>
-                    <a class="btn btn-outline-light btn-sm me-2" href="/activity">Activity</a>
+                {% if current_user.role == "admin" %}
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/tasks">Tasks</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/issues">Issues</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/approvals">Approvals</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/activity">Activity</a>
+                {% elif current_user.role == "supervisor" %}
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/tasks">Tasks</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/approvals">Approvals</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/issues">Issues</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/my-investigations">Investigations</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/activity">Activity</a>
+                {% elif current_user.role == "inputter" %}
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/tasks">Tasks</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/my-tasks">My Tasks</a>
+                    <a class="btn btn-outline-light btn-sm me-2 nav-link-btn" href="/issues">Issues</a>
                 {% endif %}
 
-                <a class="btn btn-outline-light btn-sm me-2" href="/issues">Issues</a>
-
-                <!-- USER INFO (TOP RIGHT) -->
                 <span class="user-badge me-3">
-                    👤 {{ current_user.full_name }} | {{ current_user.role|title }}
+                    {{ current_user.full_name }} | {{ current_user.role|title }}
                 </span>
 
-                <!-- LOGOUT -->
                 <a class="btn btn-danger btn-sm" href="/logout">Logout</a>
-
             </div>
         </div>
     </div>
 </nav>
 
-<div class="container top-space mb-5">
+<div class="container app-shell top-space mb-5">
     {% block content %}{% endblock %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="mb-4">
     <h2 class="page-title mb-1">Pending Approvals</h2>
-    <p class="section-subtitle mb-0">Review tasks awaiting managerial action.</p>
+    <p class="section-subtitle mb-0">Review tasks awaiting supervisor approval.</p>
 </div>
 
 <div class="card soft-card">
@@ -15,16 +15,19 @@
                         <div class="d-flex justify-content-between align-items-start flex-column flex-md-row gap-3">
                             <div>
                                 <div class="fw-semibold">{{ task.title }}</div>
-                                <div>
+
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    <span class="status-badge">{{ task.status }}</span>
+                                    <span class="priority-badge">{{ task.priority }}</span>
+                                </div>
+
+                                <div class="mt-2">
                                     <small class="text-muted">Assigned to:</small>
                                     {% if task.assigned_to %}
                                         {{ task.assigned_to.full_name }}
                                     {% else %}
                                         N/A
                                     {% endif %}
-                                </div>
-                                <div>
-                                    <small class="text-muted">Status:</small> {{ task.status }}
                                 </div>
                             </div>
 
@@ -37,7 +40,10 @@
                 {% endfor %}
             </div>
         {% else %}
-            <p class="mb-0">No pending approvals.</p>
+            <div class="text-center py-4">
+                <h5 class="mb-2">No pending approvals</h5>
+                <p class="text-muted mb-0">Tasks submitted for approval will appear here.</p>
+            </div>
         {% endif %}
     </div>
 </div>
