@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from app import login_manager
 from app.models import User
 
@@ -11,9 +11,18 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-@auth.route("/", methods=["GET", "POST"])
+@auth.route("/")
+def home():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("home.html")
+
+
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
@@ -33,4 +42,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("auth.login"))
+    return redirect(url_for("auth.home"))
