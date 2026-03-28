@@ -3,7 +3,7 @@
 {% block content %}
 <div class="mb-4">
     <h2 class="page-title mb-1">Escalate Issue</h2>
-    <p class="section-subtitle mb-0">Capture the investigation note before escalation.</p>
+    <p class="section-subtitle mb-0">Add investigation notes before escalating this issue to admin.</p>
 </div>
 
 <div class="card soft-card">
@@ -11,12 +11,12 @@
         <form method="POST">
             <div class="mb-4">
                 <label class="form-label">Investigation Note</label>
-                <textarea name="investigation_note" class="form-control" rows="5" required></textarea>
+                <textarea name="investigation_note" class="form-control" rows="5" placeholder="Enter investigation findings" required></textarea>
             </div>
 
             <div class="d-flex flex-column flex-md-row gap-2">
                 <button type="submit" class="btn btn-danger">Confirm Escalation</button>
-                <a href="/issues/{{ issue.id }}" class="btn btn-secondary">Back</a>
+                <a href="/issues/{{ issue.id }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
