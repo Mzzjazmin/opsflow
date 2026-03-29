@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">{{ title }}</h2>
+    <p class="section-subtitle mb-0">Detailed audit trail for this record.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        {% if logs %}
+            <div class="list-group">
+                {% for log in logs %}
+                    <div class="list-group-item">
+                        <div class="fw-semibold">{{ log.action }}</div>
+                        <div>
+                            <small class="text-muted">By:</small>
+                            {% if log.performed_by %}
+                                {{ log.performed_by.full_name }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </div>
+                        <div>
+                            <small class="text-muted">Time:</small> {{ log.timestamp }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <h5 class="mb-2">No activity found</h5>
+                <p class="text-muted mb-0">No tracked actions for this item yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
