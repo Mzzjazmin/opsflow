@@ -89,6 +89,8 @@ def new_user():
         db.session.add(user)
         db.session.commit()
 
+        log_activity(f"Created user: {user.full_name}", "User", user.id)
+
         flash("User created successfully.", "success")
         return redirect(url_for("main.users"))
 
@@ -121,10 +123,28 @@ def edit_user(user_id):
 
         db.session.commit()
 
+        log_activity(f"Edited user: {user.full_name}", "User", user.id)
+
         flash("User updated successfully.", "success")
         return redirect(url_for("main.users"))
 
     return render_template("user_edit_form.html", user=user)
+
+
+@main.route("/users/<int:user_id>/activity")
+@login_required
+def user_activity(user_id):
+    admin_required()
+    user = User.query.get_or_404(user_id)
+
+    logs = ActivityLog.query.filter_by(performed_by_id=user.id)\
+        .order_by(ActivityLog.timestamp.desc()).all()
+
+    return render_template(
+        "user_activity.html",
+        user=user,
+        logs=logs
+    )
 
 
 # ---------------- TASKS ----------------

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">{{ user.full_name }} - Activity</h2>
+    <p class="section-subtitle mb-0">Track actions performed by this user across the system.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        <div class="mb-4">
+            <div><strong>Name:</strong> {{ user.full_name }}</div>
+            <div><strong>Email:</strong> {{ user.email }}</div>
+            <div><strong>Role:</strong> {{ user.role|title }}</div>
+        </div>
+
+        {% if logs %}
+            <div class="list-group">
+                {% for log in logs %}
+                    <div class="list-group-item">
+                        <div class="fw-semibold">{{ log.action }}</div>
+                        <div class="mt-1">
+                            <small class="text-muted">Type:</small> {{ log.entity_type }}
+                            <span class="mx-2">|</span>
+                            <small class="text-muted">Record ID:</small> {{ log.entity_id }}
+                        </div>
+                        <div>
+                            <small class="text-muted">Time:</small> {{ log.timestamp }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <h5 class="mb-2">No activity found</h5>
+                <p class="text-muted mb-0">This user has not performed any tracked actions yet.</p>
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="/users" class="btn btn-secondary">Back to Users</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
