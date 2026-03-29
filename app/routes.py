@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash
 from app import db
 from app.models import Task, Issue, User, ActivityLog
 
@@ -41,6 +42,7 @@ def dashboard():
     completed_tasks = Task.query.filter_by(status="Completed").count()
     pending_approvals = Task.query.filter_by(approval_status="Pending").count()
     open_issues = Issue.query.filter(Issue.status != "Resolved").count()
+    total_users = User.query.count()
 
     return render_template(
         "dashboard.html",
@@ -48,8 +50,81 @@ def dashboard():
         my_tasks_count=my_tasks_count,
         completed_tasks=completed_tasks,
         pending_approvals=pending_approvals,
-        open_issues=open_issues
+        open_issues=open_issues,
+        total_users=total_users
     )
+
+
+# ---------------- USER MANAGEMENT ----------------
+@main.route("/users")
+@login_required
+def users():
+    admin_required()
+    all_users = User.query.order_by(User.full_name.asc()).all()
+    return render_template("users.html", users=all_users)
+
+
+@main.route("/users/new", methods=["GET", "POST"])
+@login_required
+def new_user():
+    admin_required()
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        email = request.form.get("email")
+        role = request.form.get("role")
+        password = request.form.get("password")
+
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash("A user with that email already exists.", "danger")
+            return render_template("user_form.html")
+
+        user = User(
+            full_name=full_name,
+            email=email,
+            role=role,
+            password=generate_password_hash(password)
+        )
+        db.session.add(user)
+        db.session.commit()
+
+        flash("User created successfully.", "success")
+        return redirect(url_for("main.users"))
+
+    return render_template("user_form.html")
+
+
+@main.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_user(user_id):
+    admin_required()
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        email = request.form.get("email")
+        role = request.form.get("role")
+        password = request.form.get("password")
+
+        existing_user = User.query.filter(User.email == email, User.id != user.id).first()
+        if existing_user:
+            flash("Another user already has that email.", "danger")
+            return render_template("user_edit_form.html", user=user)
+
+        user.full_name = full_name
+        user.email = email
+        user.role = role
+
+        if password:
+            user.password = generate_password_hash(password)
+
+        db.session.commit()
+
+        flash("User updated successfully.", "success")
+        return redirect(url_for("main.users"))
+
+    return render_template("user_edit_form.html", user=user)
 
 
 # ---------------- TASKS ----------------

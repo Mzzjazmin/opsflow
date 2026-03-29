@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title mb-1">Edit User</h2>
+    <p class="section-subtitle mb-0">Update user details, role, or password.</p>
+</div>
+
+<div class="card soft-card">
+    <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}" required>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select" required>
+                    <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                    <option value="inputter" {% if user.role == "inputter" %}selected{% endif %}>Inputter</option>
+                    <option value="supervisor" {% if user.role == "supervisor" %}selected{% endif %}>Supervisor</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">New Password</label>
+                <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
+            </div>
+
+            <div class="col-12 d-flex flex-column flex-md-row gap-2 mt-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="/users" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
